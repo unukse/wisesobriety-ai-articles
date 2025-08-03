@@ -44,9 +44,11 @@ jobs:
         run: |
           echo "✅ Article generation completed successfully!"
           echo "📅 Generated on: $(date)"
+          echo "🔗 Check your Supabase database for new articles"
           
       - name: Notify on failure
         if: failure()
         run: |
           echo "❌ Article generation failed!"
-          echo "📅 Failed on: $(date)" 
+          echo "📅 Failed on: $(date)"
+          echo "🔍 Check the logs above for error details" 

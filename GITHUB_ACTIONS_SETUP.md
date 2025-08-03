@@ -1,241 +1,172 @@
-# GitHub Actions AI Articles Setup Guide
+# GitHub Actions AI Article Generation Setup
 
-This guide will help you set up AI-powered article generation using GitHub Actions instead of Supabase Edge Functions.
+This guide will help you set up automated AI article generation for your WiseSobriety app using GitHub Actions.
 
-## 🎯 **Why GitHub Actions?**
+## 🚀 Overview
 
-- **Free**: No additional hosting costs
-- **Automated**: Runs weekly automatically
-- **Simple**: Just a YAML file
-- **Reliable**: GitHub's infrastructure
-- **Manual trigger**: Can run on-demand too
+The system will:
+- Generate 8 new recovery articles weekly using OpenAI
+- Save articles to your Supabase database
+- Update automatically every Monday at 9 AM UTC
+- Allow manual triggering from GitHub UI
 
-## 📋 **Prerequisites**
+## 📋 Prerequisites
 
-1. **OpenAI API Key**: Get from [openai.com](https://openai.com)
-2. **Supabase Project**: Your existing setup
-3. **GitHub Repository**: Your project repository
+1. **OpenAI API Key**: Get from [platform.openai.com](https://platform.openai.com)
+2. **Supabase Project**: Your existing WiseSobriety project
+3. **GitHub Repository**: Your new repository for this feature
 
-## 🚀 **Step-by-Step Setup**
+## 🔧 Setup Steps
 
-### **Step 1: Set Up Database Schema**
+### Step 1: Database Setup
 
 Run this SQL in your Supabase SQL Editor:
 
 ```sql
--- Articles Table Schema for AI-Generated Recovery Articles
-CREATE TABLE IF NOT EXISTS articles (
-  id SERIAL PRIMARY KEY,
-  title VARCHAR(255) NOT NULL UNIQUE,
-  excerpt TEXT NOT NULL,
-  content TEXT NOT NULL,
-  author VARCHAR(100) NOT NULL DEFAULT 'AI Research Assistant',
-  category VARCHAR(50) NOT NULL CHECK (category IN ('scientific', 'personal', 'research')),
-  read_time VARCHAR(20) NOT NULL,
-  publish_date DATE NOT NULL DEFAULT CURRENT_DATE,
-  icon VARCHAR(50) NOT NULL DEFAULT 'document',
-  color VARCHAR(7) NOT NULL DEFAULT '#667eea',
-  tags TEXT[] NOT NULL DEFAULT '{}',
-  ai_generated BOOLEAN NOT NULL DEFAULT true,
-  source_urls TEXT[] DEFAULT '{}',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+-- Add missing columns to existing articles table
+ALTER TABLE articles 
+ADD COLUMN IF NOT EXISTS ai_generated BOOLEAN DEFAULT true,
+ADD COLUMN IF NOT EXISTS source_urls TEXT[] DEFAULT '{}';
 
--- Create indexes for better performance
+-- Create indexes for better performance (if they don't exist)
 CREATE INDEX IF NOT EXISTS idx_articles_category ON articles(category);
 CREATE INDEX IF NOT EXISTS idx_articles_publish_date ON articles(publish_date DESC);
 CREATE INDEX IF NOT EXISTS idx_articles_ai_generated ON articles(ai_generated);
 
--- Enable Row Level Security
+-- Enable Row Level Security (if not already enabled)
 ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
 
--- Create policies
+-- Create policies (if they don't exist)
+DROP POLICY IF EXISTS "Allow authenticated users to read articles" ON articles;
 CREATE POLICY "Allow authenticated users to read articles" ON articles
   FOR SELECT USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "Allow service role to manage articles" ON articles;
 CREATE POLICY "Allow service role to manage articles" ON articles
   FOR ALL USING (auth.role() = 'service_role');
 ```
 
-### **Step 2: Add GitHub Secrets**
+### Step 2: GitHub Secrets
 
-Go to your GitHub repository → Settings → Secrets and variables → Actions, then add:
+Go to your repository → Settings → Secrets and variables → Actions
 
-1. **`OPENAI_API_KEY`**: Your OpenAI API key (starts with `sk-`)
-2. **`SUPABASE_URL`**: Your Supabase project URL
-3. **`SUPABASE_SERVICE_ROLE_KEY`**: Your Supabase service role key
+Add these 3 secrets:
 
-### **Step 3: Test Locally (Optional)**
+1. **`OPENAI_API_KEY`**
+   - Value: Your OpenAI API key (starts with `sk-`)
 
-1. **Install dependencies**:
-   ```bash
-   npm install @supabase/supabase-js dotenv
-   ```
+2. **`SUPABASE_URL`**
+   - Value: `https://nzmtiwjdtcgzifxygxsa.supabase.co`
 
-2. **Create `.env` file**:
-   ```bash
-   OPENAI_API_KEY=your_openai_api_key
-   SUPABASE_URL=your_supabase_url
-   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-   ```
+3. **`SUPABASE_SERVICE_ROLE_KEY`**
+   - Value: Your Supabase service role key (not the anon key)
 
-3. **Test the script**:
-   ```bash
-   node scripts/generate-articles.js
-   ```
-
-### **Step 4: Push to GitHub**
-
-Commit and push your changes:
+### Step 3: Push Code
 
 ```bash
 git add .
-git commit -m "Add AI article generation with GitHub Actions"
+git commit -m "Add GitHub Actions AI article generation"
 git push origin main
 ```
 
-### **Step 5: Test GitHub Actions**
+### Step 4: Test the Workflow
 
-1. Go to your GitHub repository
-2. Click the "Actions" tab
-3. You should see the "Generate AI Articles" workflow
-4. Click "Run workflow" to test manually
+1. Go to your repository → Actions tab
+2. Click "Generate AI Articles" workflow
+3. Click "Run workflow" → "Run workflow"
+4. Wait 2-3 minutes for completion
 
-## 🔧 **How It Works**
+## 📊 What Gets Generated
 
-### **Automatic Schedule**
-- Runs every Monday at 9 AM UTC
-- Generates 8 new articles covering different recovery topics
-- Saves them to your Supabase database
+The system generates 8 articles covering:
 
-### **Manual Trigger**
-- Go to Actions tab in GitHub
-- Click "Generate AI Articles"
-- Click "Run workflow"
-- Articles will be generated immediately
-
-### **Topics Covered**
-1. **Brain Recovery & Neuroplasticity** (Scientific)
-2. **Personal Recovery Journeys** (Personal Stories)
-3. **Nutrition in Recovery** (Scientific)
-4. **Mindfulness & Meditation** (Scientific)
-5. **Support Networks** (Research)
-6. **Exercise & Physical Health** (Scientific)
+1. **Brain Healing & Neuroplasticity** (Scientific)
+2. **Personal Recovery Stories** (Personal)
+3. **Nutrition & Recovery** (Scientific)
+4. **Support Networks** (Scientific)
+5. **Mindfulness & Meditation** (Scientific)
+6. **Relapse Prevention** (Scientific)
 7. **Sleep & Recovery** (Scientific)
-8. **Therapy & Mental Health** (Research)
+8. **Exercise & Fitness** (Scientific)
 
-## 📊 **Monitoring**
+## 🔍 Monitoring
 
-### **Check GitHub Actions**
-- Go to Actions tab in your repository
-- View recent runs and logs
-- See success/failure status
+### Check GitHub Actions
+- Go to Actions tab to see workflow status
+- Click on any run to see detailed logs
 
-### **Check Database**
+### Check Database
 ```sql
--- View recent articles
-SELECT * FROM articles ORDER BY created_at DESC LIMIT 10;
+-- View all AI-generated articles
+SELECT * FROM articles WHERE ai_generated = true ORDER BY created_at DESC;
 
--- Check AI-generated articles
+-- Count AI articles
 SELECT COUNT(*) FROM articles WHERE ai_generated = true;
-
--- View by category
-SELECT category, COUNT(*) FROM articles GROUP BY category;
 ```
 
-## 🛠️ **Troubleshooting**
+### Test Your App
+Your app will automatically fetch new articles from the database!
 
-### **Common Issues**
+## 🛠️ Troubleshooting
 
-1. **GitHub Actions not running**:
-   - Check if secrets are set correctly
-   - Verify the workflow file is in `.github/workflows/`
-   - Check the Actions tab for errors
+### Common Issues
 
-2. **OpenAI API errors**:
-   - Verify your API key is correct
-   - Check your OpenAI account has sufficient credits
-   - Ensure the API key has the necessary permissions
+**1. "Missing environment variables"**
+- Check that all 3 GitHub secrets are set correctly
+- Verify the secret names match exactly
 
-3. **Database connection issues**:
-   - Verify your Supabase URL and service role key
-   - Check that RLS policies are correctly set
-   - Ensure the articles table exists
+**2. "Database connection failed"**
+- Check your Supabase URL and service role key
+- Verify the database schema is set up correctly
 
-4. **Script not found**:
-   - Make sure `scripts/generate-articles.js` exists
-   - Check the file path in the workflow
+**3. "OpenAI API error"**
+- Check your OpenAI API key is valid
+- Ensure you have sufficient credits
 
-### **Debug Commands**
+**4. "No articles generated"**
+- Check the workflow logs for specific errors
+- Verify the AI prompts are working correctly
+
+### Manual Testing
+
+Run this locally to test:
 
 ```bash
-# Test locally
+# Install dependencies
+npm install @supabase/supabase-js dotenv
+
+# Create .env file with your secrets
+echo "OPENAI_API_KEY=your_key_here" > .env
+echo "SUPABASE_URL=https://nzmtiwjdtcgzifxygxsa.supabase.co" >> .env
+echo "SUPABASE_SERVICE_ROLE_KEY=your_service_key_here" >> .env
+
+# Test the script
 node scripts/generate-articles.js
-
-# Check GitHub Actions logs
-# Go to Actions tab → Click on workflow run → View logs
-
-# Check database
-# Run SQL queries in Supabase SQL Editor
 ```
 
-## 💰 **Cost Considerations**
+## 📅 Schedule
 
-- **GitHub Actions**: Free for public repos, 2000 minutes/month for private
-- **OpenAI API**: ~$0.03-0.06 per article generation
-- **Supabase**: Free tier should be sufficient
-- **Estimated monthly cost**: $5-15 depending on generation frequency
+- **Automatic**: Every Monday at 9 AM UTC
+- **Manual**: Any time via GitHub Actions UI
+- **Frequency**: 8 new articles per run
 
-## 🔒 **Security Notes**
+## 🎯 Next Steps
 
-- OpenAI API keys are stored as GitHub secrets (encrypted)
-- Supabase credentials are stored as GitHub secrets
-- Articles are generated server-side, not in the client
-- RLS policies ensure only authenticated users can read articles
+1. ✅ Set up database schema
+2. ✅ Add GitHub secrets
+3. ✅ Push code to repository
+4. ✅ Test workflow manually
+5. ✅ Verify articles appear in database
+6. ✅ Test your app integration
 
-## 📈 **Customization**
-
-### **Change Schedule**
-Edit the cron expression in `.github/workflows/generate-articles.yml`:
-```yaml
-schedule:
-  - cron: '0 9 * * 1'  # Every Monday at 9 AM UTC
-  # Change to: '0 12 * * 1' for 12 PM UTC
-```
-
-### **Add More Topics**
-Edit the `topics` array in `scripts/generate-articles.js`:
-```javascript
-const topics = [
-  // Add your new topics here
-  {
-    topic: "your new topic",
-    category: "scientific",
-    icon: "your-icon",
-    color: "#your-color",
-    tags: ["tag1", "tag2"]
-  }
-];
-```
-
-### **Change Article Length**
-Edit the prompt in `generateSingleArticle()` function to change word count.
-
-## 🎉 **Next Steps**
-
-1. **Test the setup**: Run the workflow manually
-2. **Monitor results**: Check your database for new articles
-3. **Customize topics**: Add or modify topics as needed
-4. **Adjust schedule**: Change the cron schedule if needed
-5. **Add notifications**: Consider adding Slack/Discord notifications
-
-## 📞 **Support**
+## 📞 Support
 
 If you encounter issues:
-1. Check GitHub Actions logs for detailed error messages
+1. Check the workflow logs in GitHub Actions
 2. Verify all secrets are set correctly
-3. Test the script locally first
-4. Check the troubleshooting section above
+3. Test the database connection
+4. Check OpenAI API status
 
-Your AI articles will now be generated automatically every week! 🚀 
+---
+
+**Happy coding! 🚀** 
