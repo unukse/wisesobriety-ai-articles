@@ -82,7 +82,9 @@ const topics = [
   }
 ];
 
-async function generateSingleArticle(topicConfig) {
+async function generateSingleArticle(topicConfig, retryCount = 0) {
+  const maxRetries = 2;
+  
   const prompt = `You are a research assistant specializing in alcohol recovery and addiction science. 
 
 Please research and create a comprehensive, informative article about: ${topicConfig.topic}
@@ -108,7 +110,7 @@ Please format the response as JSON with these exact fields:
 }`;
 
   try {
-    console.log(`🤖 Generating article for topic: ${topicConfig.topic}`);
+    console.log(`🤖 Generating article for topic: ${topicConfig.topic}${retryCount > 0 ? ` (retry ${retryCount})` : ''}`);
     
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -134,6 +136,11 @@ Please format the response as JSON with these exact fields:
     });
 
     if (!response.ok) {
+      if (response.status === 500 && retryCount < maxRetries) {
+        console.log(`⚠️ OpenAI API 500 error, retrying in 2 seconds... (attempt ${retryCount + 1}/${maxRetries + 1})`);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        return generateSingleArticle(topicConfig, retryCount + 1);
+      }
       throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
     }
 
@@ -234,24 +241,52 @@ async function generateArticles() {
   try {
     console.log('\n💾 Saving articles to database...');
     
-    const { data, error } = await supabase
-      .from('articles')
-      .upsert(articles, { 
-        onConflict: 'title',
-        ignoreDuplicates: false 
-      })
-      .select();
-
-    if (error) {
-      throw error;
+    // Try to insert articles one by one to handle conflicts gracefully
+    const savedArticles = [];
+    const failedArticles = [];
+    
+    for (const article of articles) {
+      try {
+        const { data, error } = await supabase
+          .from('articles')
+          .insert(article)
+          .select()
+          .single();
+          
+        if (error) {
+          if (error.code === '23505') {
+            // Duplicate article - skip it
+            console.log(`⏭️ Skipping duplicate article: ${article.title}`);
+            continue;
+          } else {
+            throw error;
+          }
+        }
+        
+        savedArticles.push(data);
+        console.log(`✅ Saved: ${article.title}`);
+        
+      } catch (error) {
+        console.error(`❌ Failed to save article "${article.title}":`, error.message);
+        failedArticles.push(article);
+      }
+    }
+    
+    console.log(`\n📊 Database Summary:`);
+    console.log(`✅ Successfully saved: ${savedArticles.length}`);
+    console.log(`❌ Failed to save: ${failedArticles.length}`);
+    console.log(`⏭️ Skipped duplicates: ${articles.length - savedArticles.length - failedArticles.length}`);
+    
+    if (savedArticles.length === 0) {
+      throw new Error('No articles were saved to database');
     }
 
-    console.log(`✅ Successfully saved ${data.length} articles to database`);
+    console.log(`✅ Successfully saved ${savedArticles.length} articles to database`);
     console.log('🎉 AI article generation completed successfully!');
     
     // Log the titles of generated articles
     console.log('\n📋 Generated Articles:');
-    data.forEach((article, index) => {
+    savedArticles.forEach((article, index) => {
       console.log(`${index + 1}. ${article.title}`);
     });
 
