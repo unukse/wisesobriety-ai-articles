@@ -7,9 +7,18 @@ import { Alert } from 'react-native';
 // Simple storage key
 const CHECKINS_STORAGE_KEY = 'wise_sobriety_checkins';
 
-// OpenAI API configuration
-const OPENAI_API_KEY = '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';
+// OpenAI API configuration - Use environment variable or secure storage
+// IMPORTANT: Never hardcode API keys in source code
+// Use environment variables, secure storage, or backend API calls instead
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+
+// Import environment variables
+import { OPENAI_API_KEY_SUMMARIES } from '@env';
+
+// Get API key from environment
+const getOpenAIApiKey = () => {
+  return OPENAI_API_KEY_SUMMARIES;
+};
 
 class SimpleCheckInStorage {
   // Save a new check-in
@@ -140,11 +149,18 @@ Be warm, supportive, and give them exact tools and steps they can implement imme
 
       console.log('Sending request to OpenAI...');
       
+      // Get API key securely
+      const apiKey = getOpenAIApiKey();
+      if (!apiKey) {
+        console.warn('⚠️ OpenAI API key not available. AI summary generation disabled.');
+        return 'AI summary generation is temporarily unavailable. Please check your configuration.';
+      }
+      
       const response = await fetch(OPENAI_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_API_KEY}`
+          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',

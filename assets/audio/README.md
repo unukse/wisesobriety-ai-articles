@@ -16,6 +16,10 @@ Add the following MP3 files to this directory:
 7. `slow-down.mp3` - Slow down meditation for finding center
 8. `belly-breathing.mp3` - Deep belly breathing exercise for relaxation
 9. `inner-stillness.mp3` - Meditation for finding inner stillness and peace
+10. `cultivate-gratitude.mp3` - Gratitude cultivation meditation
+11. `fall-asleep.mp3` - Sleep guidance meditation
+12. `calm-body.mp3` - Body relaxation and tension release meditation
+13. `easy-worry.mp3` - Simple worry and anxiety relief meditation
 
 ### Custom File Names (for user imports):
 1. `my-morning-meditation.mp3` - 5-minute morning meditation
@@ -24,6 +28,10 @@ Add the following MP3 files to this directory:
 4. `my-recovery-meditation.mp3` - 15-minute recovery-focused meditation
 5. `my-sleep-meditation.mp3` - 20-minute sleep meditation
 6. `my-gratitude-meditation.mp3` - 8-minute gratitude meditation
+7. `my-cultivate-gratitude.mp3` - Gratitude cultivation meditation
+8. `my-fall-asleep.mp3` - Sleep guidance meditation
+9. `my-calm-body.mp3` - Body relaxation and tension release meditation
+10. `my-easy-worry.mp3` - Simple worry and anxiety relief meditation
 
 ## File Requirements
 

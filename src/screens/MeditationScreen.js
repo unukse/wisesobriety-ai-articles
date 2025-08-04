@@ -242,6 +242,54 @@ export default function MeditationScreen({ navigation }) {
       
       bundledAudio: require('../../assets/audio/inner-stillness.mp3'),
     },
+    {
+      id: 15,
+      title: 'Cultivate Gratitude',
+      duration: '0:00', // Will be automatically determined by the app
+      description: 'Develop a grateful heart and positive mindset',
+      category: 'intermediate', // Likely a medium-length meditation
+      icon: 'heart',
+      color: '#fd79a8',
+      audioFileName: 'cultivate-gratitude.mp3',
+      
+      bundledAudio: require('../../assets/audio/cultivate-gratitude.mp3'),
+    },
+    {
+      id: 16,
+      title: 'Fall Asleep',
+      duration: '0:00', // Will be automatically determined by the app
+      description: 'Gentle guidance to help you drift into peaceful sleep',
+      category: 'advanced', // Sleep meditations are typically longer
+      icon: 'moon',
+      color: '#a29bfe',
+      audioFileName: 'fall-asleep.mp3',
+      
+      bundledAudio: require('../../assets/audio/fall-asleep.mp3'),
+    },
+    {
+      id: 17,
+      title: 'Calm Body',
+      duration: '0:00', // Will be automatically determined by the app
+      description: 'Release physical tension and find body relaxation',
+      category: 'intermediate', // Body scan meditations are typically medium length
+      icon: 'fitness',
+      color: '#00b894',
+      audioFileName: 'calm-body.mp3',
+      
+      bundledAudio: require('../../assets/audio/calm-body.mp3'),
+    },
+    {
+      id: 18,
+      title: 'Easy Worry',
+      duration: '0:00', // Will be automatically determined by the app
+      description: 'Simple techniques to ease worry and anxiety',
+      category: 'intermediate', // Updated to intermediate category
+      icon: 'heart-outline',
+      color: '#ff6b6b',
+      audioFileName: 'easy-worry.mp3',
+      
+      bundledAudio: require('../../assets/audio/easy-worry.mp3'),
+    },
   ];
 
   // Function to get audio duration

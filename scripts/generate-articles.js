@@ -2,16 +2,21 @@
 // This script generates recovery articles using OpenAI and saves them to Supabase
 
 const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
 
-// Configuration
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+// Configuration - Get from GitHub Actions environment variables
+const OPENAI_API_KEY_ARTICLES = process.env.OPENAI_API_KEY_ARTICLES;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!OPENAI_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+console.log('🔍 Checking environment variables...');
+console.log(`✅ OPENAI_API_KEY_ARTICLES: ${OPENAI_API_KEY_ARTICLES ? 'Set' : 'Missing'}`);
+console.log(`✅ SUPABASE_URL: ${SUPABASE_URL ? 'Set' : 'Missing'}`);
+console.log(`✅ SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'Missing'}`);
+
+if (!OPENAI_API_KEY_ARTICLES || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error('❌ Missing required environment variables');
-  console.error('Required: OPENAI_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY');
+  console.error('Required: OPENAI_API_KEY_ARTICLES, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY');
+  console.error('Please check your GitHub repository secrets');
   process.exit(1);
 }
 
@@ -108,7 +113,7 @@ Please format the response as JSON with these exact fields:
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${OPENAI_API_KEY_ARTICLES}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

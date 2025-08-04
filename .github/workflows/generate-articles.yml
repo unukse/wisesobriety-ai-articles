@@ -29,11 +29,11 @@ jobs:
           
       - name: Install dependencies
         run: |
-          npm install @supabase/supabase-js dotenv
+          npm install @supabase/supabase-js --no-package-lock
           
       - name: Generate Articles
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_KEY_ARTICLES: ${{ secrets.OPENAI_API_KEY_ARTICLES }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
