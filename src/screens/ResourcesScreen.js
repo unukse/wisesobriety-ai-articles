@@ -11,10 +11,12 @@ import {
   Platform,
   Modal,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { supabase } from '../lib/supabase';
 
 const { width } = Dimensions.get('window');
 
@@ -23,367 +25,38 @@ export default function ResourcesScreen({ navigation }) {
   const [showArticleModal, setShowArticleModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [bookmarkedArticles, setBookmarkedArticles] = useState([]);
-
-  // Articles data - this could be fetched from an API in production
-  const articles = [
-    {
-      id: 1,
-      title: 'The Science of Alcohol Recovery: What Research Shows',
-      excerpt: 'Recent studies reveal the neurobiological changes that occur during recovery and how the brain heals over time.',
-      content: `The journey to recovery from alcohol addiction is not just a matter of willpower—it's a complex process involving significant changes in brain chemistry and structure. Recent research has shown that the brain has remarkable plasticity, meaning it can heal and adapt even after years of alcohol abuse.
-
-Key findings from recent studies include:
-
-• **Neuroplasticity**: The brain can form new neural pathways and connections, even after damage from alcohol abuse. This process, called neuroplasticity, is the foundation of recovery.
-
-• **Dopamine System Recovery**: Alcohol affects the brain's reward system by flooding it with dopamine. Research shows that with sustained abstinence, the dopamine system can gradually return to normal function.
-
-• **Gray Matter Regeneration**: Studies using brain imaging have shown that gray matter volume can increase in certain brain regions after periods of sobriety, particularly in areas responsible for decision-making and emotional regulation.
-
-• **White Matter Repair**: The brain's white matter, which facilitates communication between different brain regions, can also show signs of repair and regeneration during recovery.
-
-The timeline for brain recovery varies from person to person, but research suggests that significant improvements can be seen within 6-12 months of sustained abstinence. However, some cognitive functions may take longer to fully recover.
-
-It's important to note that recovery is not linear, and setbacks are a normal part of the process. The key is persistence and seeking support when needed.`,
-      author: 'Dr. Sarah Johnson',
-      category: 'scientific',
-      readTime: '8 min',
-      publishDate: '2024-01-15',
-      icon: 'flask',
-      color: '#667eea',
-      tags: ['research', 'neuroscience', 'recovery'],
-    },
-    {
-      id: 2,
-      title: 'My First Year Sober: A Personal Journey',
-      excerpt: 'One person\'s honest account of the challenges, victories, and unexpected discoveries during their first year of sobriety.',
-      content: `I never thought I'd be writing this. One year ago, I was convinced that alcohol was my only way to cope with life's stresses. Today, I'm celebrating 365 days of sobriety, and I want to share my story in the hope that it might help someone else.
-
-**The Early Days (Months 1-3)**
-The first three months were the hardest. I experienced intense cravings, mood swings, and a constant feeling of emptiness. I had to relearn how to socialize, how to handle stress, and how to celebrate without alcohol. The physical withdrawal symptoms were challenging, but the psychological aspects were even more difficult.
-
-I found myself questioning everything about my identity. Who was I without alcohol? How would I handle social situations? What would I do with all this free time?
-
-**Finding My Footing (Months 4-6)**
-Around month four, things started to shift. I began to notice improvements in my sleep, energy levels, and overall mood. I started exercising regularly, something I had never done before. The fog in my brain began to lift, and I found myself thinking more clearly than I had in years.
-
-I also discovered new hobbies and interests. I started reading again, something I had given up years ago. I began cooking more elaborate meals, finding joy in the process rather than just the end result.
-
-**Building a New Life (Months 7-12)**
-The second half of my first year brought unexpected gifts. I reconnected with old friends who supported my sobriety, and I made new friends through recovery groups. I started therapy to address the underlying issues that had led to my drinking in the first place.
-
-I also began to repair relationships that had been damaged by my drinking. This wasn't easy, and some relationships couldn't be salvaged, but I learned to accept that and focus on the relationships that mattered.
-
-**Unexpected Discoveries**
-One of the biggest surprises was discovering that I actually enjoyed being sober. I had always assumed that life without alcohol would be boring and joyless, but I found that I was experiencing deeper, more authentic emotions and connections.
-
-I also discovered a strength within myself that I never knew existed. Facing challenges without the crutch of alcohol made me realize that I was capable of handling difficult situations on my own.
-
-**Looking Forward**
-As I enter my second year of sobriety, I'm excited about the future. I've learned that recovery is not about perfection—it's about progress. I still have bad days, but I now have the tools to handle them without turning to alcohol.
-
-To anyone reading this who is struggling: You are stronger than you think. Recovery is possible, and it's worth it. Take it one day at a time, and don't be afraid to ask for help.`,
-      author: 'Anonymous',
-      category: 'personal',
-      readTime: '6 min',
-      publishDate: '2024-01-10',
-      icon: 'heart',
-      color: '#fa709a',
-      tags: ['personal story', 'first year', 'recovery journey'],
-    },
-    {
-      id: 3,
-      title: 'The Role of Nutrition in Alcohol Recovery',
-      excerpt: 'How proper nutrition can support the healing process and improve recovery outcomes.',
-      content: `When we think about alcohol recovery, nutrition isn't always the first thing that comes to mind. However, research has shown that proper nutrition plays a crucial role in the recovery process and can significantly impact long-term outcomes.
-
-**The Impact of Alcohol on Nutrition**
-Alcohol abuse can lead to severe nutritional deficiencies. Alcohol interferes with the absorption of essential vitamins and minerals, particularly:
-
-• **B Vitamins**: Essential for brain function and energy production
-• **Vitamin D**: Important for mood regulation and immune function
-• **Magnesium**: Critical for muscle and nerve function
-• **Zinc**: Important for immune system function and wound healing
-
-**Nutritional Strategies for Recovery**
-
-**1. Replenishing B Vitamins**
-B vitamins are particularly important during recovery as they support brain function and help reduce symptoms of depression and anxiety. Good sources include:
-- Leafy green vegetables
-- Whole grains
-- Lean proteins
-- Nutritional yeast
-
-**2. Supporting Brain Health**
-Omega-3 fatty acids are crucial for brain health and can help repair damage caused by alcohol. Sources include:
-- Fatty fish (salmon, mackerel, sardines)
-- Flaxseeds and chia seeds
-- Walnuts
-- Algae supplements
-
-**3. Stabilizing Blood Sugar**
-Alcohol can cause blood sugar fluctuations, which can contribute to mood swings and cravings. To stabilize blood sugar:
-- Eat regular meals throughout the day
-- Include protein with every meal
-- Choose complex carbohydrates over simple sugars
-- Avoid skipping meals
-
-**4. Supporting Liver Health**
-The liver is responsible for processing alcohol and other toxins. To support liver health:
-- Eat plenty of antioxidant-rich foods (berries, leafy greens, cruciferous vegetables)
-- Include foods that support liver function (garlic, turmeric, green tea)
-- Stay hydrated with plenty of water
-
-**Practical Tips for Implementation**
-
-**Start Small**: Don't try to overhaul your entire diet at once. Start by adding one healthy habit at a time.
-
-**Plan Ahead**: Prepare healthy snacks and meals in advance to avoid reaching for unhealthy options when hungry.
-
-**Stay Hydrated**: Dehydration can be mistaken for hunger and can contribute to cravings. Aim for at least 8 glasses of water per day.
-
-**Listen to Your Body**: Pay attention to how different foods make you feel. Some people find that certain foods trigger cravings or affect their mood.
-
-**Seek Professional Help**: Consider working with a registered dietitian who specializes in addiction recovery to develop a personalized nutrition plan.
-
-**The Connection Between Nutrition and Mental Health**
-Research has shown a strong connection between diet and mental health. A diet rich in whole foods, healthy fats, and essential nutrients can help:
-- Reduce symptoms of depression and anxiety
-- Improve sleep quality
-- Increase energy levels
-- Reduce inflammation in the body
-
-**Remember**: Nutrition is just one piece of the recovery puzzle. It works best when combined with other recovery strategies like therapy, support groups, and medical care when needed.
-
-The key is to be patient with yourself and to remember that every healthy choice you make is a step toward better health and recovery.`,
-      author: 'Dr. Michael Chen',
-      category: 'scientific',
-      readTime: '7 min',
-      publishDate: '2024-01-08',
-      icon: 'nutrition',
-      color: '#43e97b',
-      tags: ['nutrition', 'health', 'recovery'],
-    },
-    {
-      id: 4,
-      title: 'Building a Support Network: Why Connection Matters',
-      excerpt: 'The importance of social support in recovery and how to build meaningful connections.',
-      content: `Recovery from alcohol addiction is not a solo journey. While the decision to get sober is deeply personal, the path to lasting recovery is often paved with the support of others. Research consistently shows that having a strong support network is one of the most important predictors of successful recovery.
-
-**Why Support Networks Matter**
-
-**1. Accountability**
-Having people who know about your recovery goals creates a sense of accountability. When others are invested in your success, it can provide motivation to stay on track, especially during difficult times.
-
-**2. Emotional Support**
-Recovery can be emotionally challenging. Having people who understand what you're going through and can offer empathy and encouragement is invaluable.
-
-**3. Practical Support**
-Support networks can provide practical help, such as rides to meetings, help with childcare, or assistance during difficult situations.
-
-**4. Role Models**
-Seeing others who have successfully navigated recovery can provide hope and inspiration. It shows that recovery is possible and gives you examples to follow.
-
-**Building Your Support Network**
-
-**1. Start with Professional Support**
-- Therapists or counselors who specialize in addiction
-- Medical professionals who can provide medical support
-- Addiction specialists who can guide your recovery process
-
-**2. Join Support Groups**
-- Alcoholics Anonymous (AA) or other 12-step programs
-- SMART Recovery groups
-- Online support communities
-- Recovery-focused social media groups
-
-**3. Reconnect with Family and Friends**
-- Be honest about your recovery journey
-- Set boundaries with people who may not support your sobriety
-- Focus on relationships that are healthy and supportive
-
-**4. Build New Connections**
-- Join clubs or groups based on your interests
-- Volunteer for causes you care about
-- Take classes or workshops
-- Join sports teams or fitness groups
-
-**5. Consider Sober Living Communities**
-- Provide structured support during early recovery
-- Offer peer support and accountability
-- Help develop life skills needed for independent living
-
-**Maintaining Healthy Boundaries**
-
-While support is crucial, it's also important to maintain healthy boundaries:
-
-**1. Be Selective**
-Not everyone needs to know about your recovery journey. Choose carefully who you share with and how much you share.
-
-**2. Set Clear Expectations**
-Be clear about what kind of support you need and what you don't need.
-
-**3. Avoid Toxic Relationships**
-Distance yourself from people who don't support your recovery or who may trigger relapse.
-
-**4. Practice Self-Care**
-Remember that you can't pour from an empty cup. Take care of yourself so you can be there for others.
-
-**The Role of Technology**
-
-Modern technology has made it easier than ever to connect with others in recovery:
-
-**1. Online Support Groups**
-- 24/7 access to support
-- Anonymity for those who prefer it
-- Ability to connect with people from around the world
-
-**2. Recovery Apps**
-- Track progress and milestones
-- Connect with others in recovery
-- Access to resources and tools
-
-**3. Social Media**
-- Follow recovery-focused accounts
-- Join recovery communities
-- Share your journey (if comfortable)
-
-**Remember**: Building a support network takes time and effort. Don't get discouraged if it doesn't happen overnight. Focus on making one connection at a time, and remember that quality is more important than quantity.
-
-The most important thing is to keep reaching out, even when it's difficult. Recovery is possible, and you don't have to do it alone.`,
-      author: 'Dr. Lisa Rodriguez',
-      category: 'scientific',
-      readTime: '9 min',
-      publishDate: '2024-01-05',
-      icon: 'people',
-      color: '#764ba2',
-      tags: ['support', 'community', 'recovery'],
-    },
-    {
-      id: 5,
-      title: 'Mindfulness and Meditation in Recovery',
-      excerpt: 'How mindfulness practices can support emotional regulation and reduce relapse risk.',
-      content: `Mindfulness and meditation have become increasingly recognized as powerful tools in addiction recovery. Research has shown that these practices can help individuals develop better emotional regulation, reduce stress, and decrease the likelihood of relapse.
-
-**What is Mindfulness?**
-
-Mindfulness is the practice of paying attention to the present moment without judgment. It involves observing thoughts, feelings, and sensations as they arise, without trying to change them or react to them immediately.
-
-**The Science Behind Mindfulness in Recovery**
-
-**1. Brain Changes**
-Research using brain imaging has shown that regular mindfulness practice can lead to structural changes in the brain, particularly in areas responsible for:
-- Emotional regulation
-- Attention and focus
-- Decision-making
-- Stress response
-
-**2. Stress Reduction**
-Mindfulness has been shown to reduce levels of cortisol, the body's primary stress hormone. This is particularly important in recovery, as stress is a common trigger for relapse.
-
-**3. Improved Emotional Regulation**
-Mindfulness helps individuals develop the ability to observe their emotions without being overwhelmed by them. This skill is crucial for managing cravings and difficult emotions during recovery.
-
-**Practical Mindfulness Techniques for Recovery**
-
-**1. Breath Awareness**
-This is the foundation of mindfulness practice:
-- Find a comfortable position
-- Close your eyes or soften your gaze
-- Focus your attention on your breath
-- Notice the sensation of breathing in and out
-- When your mind wanders, gently bring it back to your breath
-
-**2. Body Scan**
-This practice helps develop body awareness:
-- Lie down in a comfortable position
-- Close your eyes
-- Bring your attention to your toes
-- Slowly move your attention up through your body
-- Notice any sensations, tension, or relaxation
-
-**3. Mindful Walking**
-This can be done anywhere:
-- Walk slowly and deliberately
-- Pay attention to the sensation of your feet touching the ground
-- Notice the movement of your body
-- Observe your surroundings without judgment
-
-**4. Mindful Eating**
-This can help develop a healthier relationship with food:
-- Eat slowly and without distractions
-- Pay attention to the taste, texture, and smell of your food
-- Notice when you're hungry and when you're full
-- Appreciate the nourishment your food provides
-
-**5. Loving-Kindness Meditation**
-This practice cultivates compassion for yourself and others:
-- Sit comfortably and close your eyes
-- Begin by directing kind thoughts toward yourself
-- Gradually extend these thoughts to others
-- Repeat phrases like "May I be happy, may I be healthy, may I be at peace"
-
-**Integrating Mindfulness into Daily Life**
-
-**1. Start Small**
-Begin with just 5-10 minutes of practice per day. It's better to practice consistently for a short time than to practice sporadically for longer periods.
-
-**2. Use Reminders**
-Set reminders on your phone or place sticky notes in visible locations to remind yourself to practice mindfulness throughout the day.
-
-**3. Practice During Routine Activities**
-Bring mindfulness to everyday activities like:
-- Brushing your teeth
-- Washing dishes
-- Taking a shower
-- Walking to your car
-
-**4. Use Apps and Resources**
-There are many apps and online resources available to guide mindfulness practice:
-- Headspace
-- Calm
-- Insight Timer
-- UCLA Mindful Awareness Research Center
-
-**Mindfulness and Relapse Prevention**
-
-**1. Recognizing Triggers**
-Mindfulness can help you become more aware of your triggers and the early warning signs of potential relapse.
-
-**2. Managing Cravings**
-When cravings arise, mindfulness can help you:
-- Observe the craving without acting on it
-- Recognize that cravings are temporary
-- Choose how to respond rather than reacting automatically
-
-**3. Coping with Difficult Emotions**
-Mindfulness provides tools for dealing with difficult emotions without turning to alcohol:
-- Observe emotions without judgment
-- Allow emotions to arise and pass naturally
-- Choose healthy coping strategies
-
-**The Benefits of Regular Practice**
-
-Regular mindfulness practice can lead to:
-- Reduced stress and anxiety
-- Improved sleep quality
-- Better emotional regulation
-- Increased self-awareness
-- Enhanced relationships
-- Greater sense of well-being
-
-**Remember**: Mindfulness is a skill that develops over time. Be patient with yourself and remember that every moment of practice is beneficial, even if it doesn't feel like it at the time.
-
-The key is consistency rather than perfection. Even a few minutes of mindfulness practice each day can make a significant difference in your recovery journey.`,
-      author: 'Dr. James Wilson',
-      category: 'scientific',
-      readTime: '10 min',
-      publishDate: '2024-01-03',
-      icon: 'leaf',
-      color: '#4facfe',
-      tags: ['mindfulness', 'meditation', 'recovery'],
-    },
-  ];
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch articles from Supabase
+  const fetchArticles = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const { data, error: fetchError } = await supabase
+        .from('articles')
+        .select('*')
+        .order('publish_date', { ascending: false });
+      
+      if (fetchError) {
+        throw fetchError;
+      }
+      
+      setArticles(data || []);
+    } catch (err) {
+      console.error('Error fetching articles:', err);
+      setError('Failed to load articles. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load articles on component mount
+  useEffect(() => {
+    fetchArticles();
+  }, []);
 
   const categories = [
     { id: 'all', name: 'All Articles', icon: 'library' },
@@ -448,32 +121,7 @@ The key is consistency rather than perfection. Even a few minutes of mindfulness
     },
   ];
 
-  const educationalContent = [
-    {
-      id: 1,
-      title: 'Understanding Addiction',
-      description: 'Learn about the science behind addiction and recovery',
-      duration: '5 min read',
-      icon: 'school',
-      color: '#667eea',
-    },
-    {
-      id: 2,
-      title: 'Coping Strategies',
-      description: 'Healthy ways to deal with stress and triggers',
-      duration: '3 min read',
-      icon: 'shield-checkmark',
-      color: '#43e97b',
-    },
-    {
-      id: 3,
-      title: 'Building Healthy Habits',
-      description: 'Replace old habits with positive new ones',
-      duration: '4 min read',
-      icon: 'fitness',
-      color: '#fa709a',
-    },
-  ];
+
 
   // Filter articles based on selected category
   const filteredArticles = selectedCategory === 'all' 
@@ -533,28 +181,7 @@ The key is consistency rather than perfection. Even a few minutes of mindfulness
     </TouchableOpacity>
   );
 
-  const EducationCard = ({ content }) => (
-    <TouchableOpacity
-      style={styles.educationCard}
-      activeOpacity={0.8}
-    >
-      <LinearGradient
-        colors={['#ffffff', '#f8f9fa']}
-        style={styles.educationGradient}
-      >
-        <View style={styles.educationHeader}>
-          <View style={styles.educationIconContainer}>
-            <Ionicons name={content.icon} size={24} color={content.color} />
-          </View>
-          <View style={styles.educationInfo}>
-            <Text style={styles.educationTitle}>{content.title}</Text>
-            <Text style={styles.educationDuration}>{content.duration}</Text>
-          </View>
-        </View>
-        <Text style={styles.educationDescription}>{content.description}</Text>
-      </LinearGradient>
-    </TouchableOpacity>
-  );
+
 
   const ArticleCard = ({ article }) => {
     const isBookmarked = bookmarkedArticles.includes(article.id);
@@ -639,28 +266,7 @@ The key is consistency rather than perfection. Even a few minutes of mindfulness
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.emergencySection}>
-            <View style={styles.emergencyCard}>
-              <LinearGradient
-                colors={['#ff6b6b', '#ee5a52']}
-                style={styles.emergencyGradient}
-              >
-                <Ionicons name="warning" size={32} color="#ffffff" />
-                <Text style={styles.emergencyTitle}>Need Immediate Help?</Text>
-                <Text style={styles.emergencyText}>
-                  If you're in crisis or need immediate support, call the National Suicide Prevention Lifeline
-                </Text>
-                <TouchableOpacity
-                  style={styles.emergencyButton}
-                  onPress={() => Linking.openURL('tel:1-800-273-8255')}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.emergencyButtonText}>Call 1-800-273-8255</Text>
-                  <Ionicons name="call" size={20} color="#ffffff" />
-                </TouchableOpacity>
-              </LinearGradient>
-            </View>
-          </View>
+
 
           <View style={styles.articlesSection}>
             <View style={styles.sectionHeader}>
@@ -668,37 +274,66 @@ The key is consistency rather than perfection. Even a few minutes of mindfulness
               <Text style={styles.sectionSubtitle}>Updated weekly with new research and stories</Text>
             </View>
             
-            <View style={styles.categoryContainer}>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.categoryContainer}
+            >
               {categories.map((category) => (
                 <CategoryButton key={category.id} category={category} />
               ))}
-            </View>
+            </ScrollView>
 
-            {filteredArticles.map((article) => (
-              <ArticleCard key={article.id} article={article} />
-            ))}
+            {/* Loading State */}
+            {loading && (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#ffffff" />
+                <Text style={styles.loadingText}>Loading articles...</Text>
+              </View>
+            )}
+
+            {/* Error State */}
+            {error && !loading && (
+              <View style={styles.errorContainer}>
+                <Ionicons name="alert-circle" size={48} color="#ff6b6b" />
+                <Text style={styles.errorTitle}>Failed to Load Articles</Text>
+                <Text style={styles.errorText}>{error}</Text>
+                <TouchableOpacity
+                  style={styles.retryButton}
+                  onPress={fetchArticles}
+                >
+                  <Text style={styles.retryButtonText}>Try Again</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Empty State */}
+            {!loading && !error && filteredArticles.length === 0 && (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="document-text" size={48} color="#ccc" />
+                <Text style={styles.emptyTitle}>No Articles Found</Text>
+                <Text style={styles.emptyText}>
+                  {selectedCategory === 'all' 
+                    ? 'No articles are available yet. Check back soon for new content!'
+                    : `No ${selectedCategory} articles found. Try selecting a different category.`
+                  }
+                </Text>
+              </View>
+            )}
+
+            {/* Articles List */}
+            {!loading && !error && filteredArticles.length > 0 && (
+              filteredArticles.map((article) => (
+                <ArticleCard key={article.id} article={article} />
+              ))
+            )}
           </View>
 
 
 
-          <View style={styles.educationSection}>
-            <Text style={styles.sectionTitle}>Educational Content</Text>
-            {educationalContent.map((content) => (
-              <EducationCard key={content.id} content={content} />
-            ))}
-          </View>
 
-          <View style={styles.tipsSection}>
-            <View style={styles.tipsCard}>
-              <Ionicons name="bulb" size={24} color="#667eea" style={styles.tipsIcon} />
-              <Text style={styles.tipsTitle}>Remember</Text>
-              <Text style={styles.tipsText}>
-                Recovery is a journey, not a destination. It's okay to ask for help, 
-                and there are many people and resources available to support you. 
-                You don't have to go through this alone.
-              </Text>
-            </View>
-          </View>
+
+
         </ScrollView>
 
         {/* Article Reader Modal */}
@@ -779,51 +414,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 70,
   },
-  emergencySection: {
-    marginBottom: 20,
-  },
-  emergencyCard: {
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 15,
-  },
-  emergencyGradient: {
-    padding: 25,
-    borderRadius: 20,
-    alignItems: 'center',
-  },
-  emergencyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    marginTop: 15,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  emergencyText: {
-    fontSize: 14,
-    color: '#ffffff',
-    textAlign: 'center',
-    marginBottom: 20,
-    lineHeight: 20,
-  },
-  emergencyButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 25,
-  },
-  emergencyButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-    marginRight: 8,
-  },
+
   resourcesSection: {
     marginBottom: 20,
   },
@@ -873,81 +464,8 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     opacity: 0.9,
   },
-  educationSection: {
-    marginBottom: 20,
-  },
-  educationCard: {
-    marginBottom: 15,
-    borderRadius: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  educationGradient: {
-    padding: 20,
-    borderRadius: 15,
-  },
-  educationHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  educationIconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-  },
-  educationInfo: {
-    flex: 1,
-  },
-  educationTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  educationDuration: {
-    fontSize: 12,
-    color: '#8e8e93',
-  },
-  educationDescription: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-  },
-  tipsSection: {
-    marginBottom: 30,
-  },
-  tipsCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 20,
-    padding: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  tipsIcon: {
-    marginBottom: 10,
-  },
-  tipsTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  tipsText: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-  },
+
+
   articlesSection: {
     marginBottom: 20,
   },
@@ -967,7 +485,7 @@ const styles = StyleSheet.create({
   },
   categoryContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    paddingHorizontal: 20,
     marginBottom: 20,
   },
   categoryButton: {
@@ -977,6 +495,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    marginRight: 10,
   },
   categoryButtonActive: {
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
@@ -1098,5 +617,65 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#444',
     lineHeight: 24,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    color: '#ffffff',
+    fontSize: 16,
+    marginTop: 10,
+  },
+  errorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  errorTitle: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  errorText: {
+    color: '#ffffff',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 20,
+    opacity: 0.8,
+  },
+  retryButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  emptyTitle: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  emptyText: {
+    color: '#ffffff',
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.8,
   },
 }); 

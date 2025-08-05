@@ -2,8 +2,8 @@ name: Generate AI Articles
 
 on:
   schedule:
-    # Run every Monday at 9 AM UTC
-    - cron: '0 9 * * 1'
+    # Run every 2 weeks on Monday at 9 AM UTC
+    - cron: '0 9 */2 * 1'
   workflow_dispatch:
     # Allow manual triggering from GitHub UI
     inputs:
