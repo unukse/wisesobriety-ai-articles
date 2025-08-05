@@ -20,6 +20,9 @@ Add the following MP3 files to this directory:
 11. `fall-asleep.mp3` - Sleep guidance meditation
 12. `calm-body.mp3` - Body relaxation and tension release meditation
 13. `easy-worry.mp3` - Simple worry and anxiety relief meditation
+14. `renew-mind.mp3` - Mind renewal and mental clarity meditation
+15. `clear-mind.mp3` - Mental clarity and focus meditation
+16. `heal-soul.mp3` - Deep soul healing and spiritual renewal meditation
 
 ### Custom File Names (for user imports):
 1. `my-morning-meditation.mp3` - 5-minute morning meditation
@@ -32,6 +35,9 @@ Add the following MP3 files to this directory:
 8. `my-fall-asleep.mp3` - Sleep guidance meditation
 9. `my-calm-body.mp3` - Body relaxation and tension release meditation
 10. `my-easy-worry.mp3` - Simple worry and anxiety relief meditation
+11. `my-renew-mind.mp3` - Mind renewal and mental clarity meditation
+12. `my-clear-mind.mp3` - Mental clarity and focus meditation
+13. `my-heal-soul.mp3` - Deep soul healing and spiritual renewal meditation
 
 ## File Requirements
 

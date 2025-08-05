@@ -290,6 +290,42 @@ export default function MeditationScreen({ navigation }) {
       
       bundledAudio: require('../../assets/audio/easy-worry.mp3'),
     },
+    {
+      id: 19,
+      title: 'Renew Mind',
+      duration: '0:00', // Will be automatically determined by the app
+      description: 'Renew your mind and find mental clarity',
+      category: 'advanced', // Longer meditation for deep mental work
+      icon: 'refresh',
+      color: '#74b9ff',
+      audioFileName: 'renew-mind.mp3',
+      
+      bundledAudio: require('../../assets/audio/renew-mind.mp3'),
+    },
+    {
+      id: 20,
+      title: 'Clear Mind',
+      duration: '0:00', // Will be automatically determined by the app
+      description: 'Clear mental fog and enhance focus',
+      category: 'advanced', // Longer meditation for mental clarity
+      icon: 'eye',
+      color: '#a29bfe',
+      audioFileName: 'clear-mind.mp3',
+      
+      bundledAudio: require('../../assets/audio/clear-mind.mp3'),
+    },
+    {
+      id: 21,
+      title: 'Heal Soul',
+      duration: '0:00', // Will be automatically determined by the app
+      description: 'Deep soul healing and spiritual renewal',
+      category: 'advanced', // Deep healing meditation
+      icon: 'sparkles',
+      color: '#fd79a8',
+      audioFileName: 'heal-soul.mp3',
+      
+      bundledAudio: require('../../assets/audio/heal-soul.mp3'),
+    },
   ];
 
   // Function to get audio duration
