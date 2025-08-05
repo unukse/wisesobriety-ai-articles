@@ -295,7 +295,7 @@ export default function MeditationScreen({ navigation }) {
       title: 'Renew Mind',
       duration: '0:00', // Will be automatically determined by the app
       description: 'Renew your mind and find mental clarity',
-      category: 'advanced', // Longer meditation for deep mental work
+      category: 'intermediate', // Updated to intermediate category
       icon: 'refresh',
       color: '#74b9ff',
       audioFileName: 'renew-mind.mp3',
@@ -307,7 +307,7 @@ export default function MeditationScreen({ navigation }) {
       title: 'Clear Mind',
       duration: '0:00', // Will be automatically determined by the app
       description: 'Clear mental fog and enhance focus',
-      category: 'advanced', // Longer meditation for mental clarity
+      category: 'intermediate', // Updated to intermediate category
       icon: 'eye',
       color: '#a29bfe',
       audioFileName: 'clear-mind.mp3',
@@ -319,7 +319,7 @@ export default function MeditationScreen({ navigation }) {
       title: 'Heal Soul',
       duration: '0:00', // Will be automatically determined by the app
       description: 'Deep soul healing and spiritual renewal',
-      category: 'advanced', // Deep healing meditation
+      category: 'intermediate', // Updated to intermediate category
       icon: 'sparkles',
       color: '#fd79a8',
       audioFileName: 'heal-soul.mp3',
